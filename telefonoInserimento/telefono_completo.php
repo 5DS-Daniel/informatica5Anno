@@ -24,15 +24,18 @@
             background-color: #ffe5e5;
             border-radius: 5px;
         }
-
     </style>
+
+
+
 </head>
 <body>
 <?php
-    $dangerNome = $dangerCognome = $dangerFiscale = $dangerMatricola = $dangerData = $dangerOra = '';
+    $dangerNome = $dangerCognome = $dangerFiscale = $dangerMatricola = $dangerData = $dangerOra = $dangerGruppo = '';
     $dangerNumero = $dangerOperatore = $dangerTipoNumero = '';
     $nome = $cognome = $codice_fiscale = $matricola = $data_nascita = $ora_nascita = '';
     $message = '';
+    $ultimo_contatto = '';
 
 
     try {
@@ -51,7 +54,7 @@
         $matricola      = @mysqli_real_escape_string($db_conn, strtoupper(filtro_testo($_POST['txtMatricola'])));
         $data_nascita   = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['txtDataNascita']));
         $ora_nascita    = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['txtOraNascita']));
-        $valid = true;
+        $valido = true;
         
         if (empty($nome)) {
             $dangerNome = "error";
@@ -79,7 +82,7 @@
         }
 
 
-        if ($valid) {
+        if ($valido) {
             $_SESSION['insert'] = [
                 "nome" => isset($nome) ? $nome : '',
                 "cognome" => isset($cognome) ? $cognome : '',
@@ -146,24 +149,43 @@
                 exit();
                 
             }
-
-
-            //se siamo qui, il contatto e' stato inserito con successo
-
-
             //Proviamo a recuperare l'ultimo contatto inserito
             try {
-                $query = "SELECT id_contatti FROM tcontatti ORDER BY id_contatti DESC LIMIT 1";
-                $risultato = mysqli_query($db_conn, $query);
-            
-                if ($risultato && $row = mysqli_fetch_assoc($risultato)) {
-                    $ultimo_contatto = strval($row['id_contatti']); // Converte l'ID in stringa
+                $ultimo_contatto = mysqli_insert_id($db_conn);
+                if ($ultimo_contatto) {
+                     $ultimo_contatto = strval($ultimo_contatto); // Converte l'ID in stringa
                 }
             } catch (Exception $e) {
                 $error_message = $e->getMessage();
-            }                
+            }                   
 
-            $valido = true;
+            //se siamo qui, il contatto e' stato inserito con successo
+
+            if (empty($_POST['gruppi']) || !is_array($_POST['gruppi'])) {
+                $dangerGruppo = "error";
+                $valido = false;
+            }
+
+            if ($valido) {
+                try {
+                    foreach ($_POST['gruppi'] as $gruppo_id) {
+                        $gruppo_id = mysqli_real_escape_string($db_conn, $gruppo_id);
+                        $query_gruppi = "INSERT INTO tcontatti_gruppi (contatto_id, gruppo_id) 
+                                         VALUES ('$ultimo_contatto', '$gruppo_id')";
+                        $risultato = mysqli_query($db_conn, $query_gruppi);
+
+                        if (!$risultato) {
+                            throw new Exception("Errore nell'inserimento: " . mysqli_error($db_conn));
+                        }
+                    }
+                } catch (Exception $e) {
+                    $message = $e->getMessage();
+                    echo $message;
+                    header("refresh:3; telefono_completo.php");
+                    exit();
+                }   
+            }
+    
             $numero = trim($_POST['numero']);
             $operatore = isset($_POST['operatore']) ? trim($_POST['operatore']) : '';
             $tipoNumero = isset($_POST['tipoNumero']) ? trim($_POST['tipoNumero']) : '';
@@ -298,6 +320,24 @@
             </tr>
 
             <tr>
+                <td>Gruppi</td>
+                <td class="<?= $dangerGruppo ?>">
+                    <?php
+                    try {
+                        $sql_gruppi = "SELECT id_gruppo, nome FROM tgruppi";
+                        $result_gruppi = $db_conn->query($sql_gruppi);
+
+                        while ($row = $result_gruppi->fetch_assoc()) {
+                            echo "<input type='checkbox' name='gruppi[]' value='{$row['id_gruppo']}'> " . htmlspecialchars($row['nome']) . "<br>";
+                        }
+                    } catch (Exception $e) {
+                        echo "Errore nel recupero dei gruppi: " . $e->getMessage();
+                    }
+                    ?>
+                </td>
+
+            </tr>
+            <tr>
                 <td>
                     Numero di telefono
                 </td>
@@ -305,6 +345,8 @@
                     <input type="text" name="numero" value="<?= $_SESSION['insert']['numero'] ?? '' ?>" required minlength="10" maxlength="10">
                 </td>
             </tr>
+
+
 
             <tr>
                 <td>Operatore</td>
