@@ -2,8 +2,8 @@
 
 
 $path2root = "../";
-require $path2root.'/pages/config.php';
 include $path2root.'/components/navbar.php';
+require $path2root.'/pages/config.php';
 
 
 

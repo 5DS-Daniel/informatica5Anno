@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 $path2root = "../";
 include $path2root.'/components/navbar.php';
 require $path2root.'/pages/config.php';
@@ -41,15 +43,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
 
             $_SESSION['user'] = $username;
+            echo "Registrazione avvenuta con successo!";
             header("Location:" . $path2root . "index.php");
             exit();
         } catch (Exception $e) {
             $message = $e->getMessage();
-                    
+
             if (@mysqli_errno($conn) == 1644) {
                 $message = @mysqli_error($conn);
                 $errors[] = $message;
-            }     
+            }
         }
     }
 }
