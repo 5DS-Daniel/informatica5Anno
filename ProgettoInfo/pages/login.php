@@ -1,14 +1,13 @@
 <?php
 
-
+session_start();
 $path2root = "../";
 include $path2root.'/components/navbar.php';
 require $path2root.'/pages/config.php';
 
-
-
+// Se l'utente è già loggato, lo reindirizziamo alla home
 if (isset($_SESSION['user'])) {
-    header("Location:" . $path2root. "index.php");
+    header("Location: " . $path2root . "index.php");
     exit();
 }
 
@@ -21,18 +20,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($email) || empty($password)) {
         $errors[] = "Tutti i campi sono obbligatori.";
     } else {
-        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE email = ?");
+        // Recuperiamo l'utente dal database
+        $stmt = $conn->prepare("SELECT id, username, password, ruolo FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $stmt->store_result();
 
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($id, $username, $hashed_password);
+            $stmt->bind_result($id, $username, $hashed_password, $ruolo);
             $stmt->fetch();
+            
             if (password_verify($password, $hashed_password)) {
+                // Salviamo i dati in sessione
                 $_SESSION['user'] = $username;
                 $_SESSION['user_id'] = $id;
-                header("Location:" . $path2root . "index.php");
+                $_SESSION['ruolo'] = $ruolo; // Salvataggio del ruolo
+
+                header("Location: " . $path2root . "index.php");
                 exit();
             } else {
                 $errors[] = "Email o password errata.";

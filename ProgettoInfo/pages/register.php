@@ -43,6 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
 
             $_SESSION['user'] = $username;
+            $_SESSION['role'] = 'user';
             echo "Registrazione avvenuta con successo!";
             header("Location:" . $path2root . "index.php");
             exit();
@@ -109,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </form>
 
                 <p class="mt-3 text-center">
-                    Hai già un account? <a href="<?php echo $path2root ?>/pages/login.php">Accedi</a>
+                    Hai già un account? <a href="<?php echo $path2root ?>pages/login.php">Accedi</a>
                 </p>
             </div>
         </div>
