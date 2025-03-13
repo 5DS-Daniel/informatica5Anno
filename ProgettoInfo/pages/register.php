@@ -42,14 +42,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->execute();
             $stmt->close();
 
+            $user_folder = $path2root . "uploads/" . $username;
+
+            if (!file_exists($user_folder)) {
+                if (!mkdir($user_folder, 0777, true)) {
+                    $errors[] = "Errore nella creazione della cartella per l'utente.";
+                }
+            }
+
             $_SESSION['user'] = $username;
             $_SESSION['role'] = 'user';
+
             echo "Registrazione avvenuta con successo!";
             header("Location:" . $path2root . "index.php");
             exit();
         } catch (Exception $e) {
             $message = $e->getMessage();
-
             if (@mysqli_errno($conn) == 1644) {
                 $message = @mysqli_error($conn);
                 $errors[] = $message;
