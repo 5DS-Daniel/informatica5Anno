@@ -55,7 +55,7 @@ $stmt->close();
                                 <p class="card-text"><?= htmlspecialchars($prodotto['descrizione']) ?></p>
                                 <h6 class="text-primary"><?= htmlspecialchars($prodotto['prezzo']) ?>€</h6>
                                 <p class="small text-muted">Venduto da: <?= htmlspecialchars($prodotto['username']) ?></p>
-                                <button class="btn btn-success w-100">🛒 Aggiungi al carrello</button>
+                                <button class="btn w-100" style="background-color: #FFB22C">🛒 Aggiungi al carrello</button>
                             </div>
                         </div>
                     </div>
