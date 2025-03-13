@@ -1,4 +1,4 @@
-</html>
+
 <?php
 
 session_start();
@@ -12,7 +12,7 @@ if (!isset($_SESSION['user'])) {
 
 $username = $_SESSION['user'];
 
-$stmt = $conn->prepare("SELECT email, password, profile_pic FROM users WHERE username = ?");
+$stmt = $conn->prepare("SELECT id, email, password, profile_pic FROM users WHERE username = ?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -26,6 +26,19 @@ if (!$userData) {
 $email = $userData['email'];
 $hashed_password = $userData['password'];
 $profile_pic = !empty($userData['profile_pic']) ? $userData['profile_pic'] : "default.png";
+
+
+//PRODOTTI VENDUTI DALL'UTENTE
+$stmt = $conn->prepare("SELECT id, nome, descrizione, prezzo, immagine FROM products WHERE user_id = ?");
+$stmt->bind_param("i", $userData['id']);
+$stmt->execute();
+$productsResult = $stmt->get_result();
+$products = [];
+while ($product = $productsResult->fetch_assoc()) {
+    $products[] = $product;
+}
+$stmt->close();
+
 $errors = [];
 $success = "";
 
@@ -143,9 +156,30 @@ include $path2root . '/components/navbar.php';
                         <input type="password" name="new_password" id="new_password" class="form-control">
                     </div>
 
-                    <button type="submit" name="update_account" class="btn btn-primary w-100">Aggiorna</button>
+                    <button type="submit" name="update_account" style="background-color: #FFB22C" class="btn  w-100">Aggiorna</button>
                 </form>
 
+                <hr class="my-4">
+                <h3 class="mb-4">I tuoi prodotti in vendita</h3>
+
+                <?php if (count($products) > 0): ?>
+                    <div class="row">
+                        <?php foreach ($products as $product): ?>
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <img src="<?php echo htmlspecialchars($product['immagine']); ?>" class="card-img-top" alt="Immagine prodotto" style="height: 150px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><?php echo htmlspecialchars($product['nome']); ?></h5>
+                                        <p class="card-text"><?php echo htmlspecialchars($product['descrizione']); ?></p>
+                                        <p class="card-text"><strong>€<?php echo number_format($product['prezzo'], 2, ',', '.'); ?></strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p>Non hai ancora caricato nessun prodotto.</p>
+                <?php endif; ?>
             </div>
         </div>
     </div>
