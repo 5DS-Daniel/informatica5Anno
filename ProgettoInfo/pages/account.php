@@ -1,3 +1,4 @@
+</html>
 <?php
 
 session_start();
@@ -28,38 +29,43 @@ $profile_pic = !empty($userData['profile_pic']) ? $userData['profile_pic'] : "de
 $errors = [];
 $success = "";
 
-// Gestione upload immagine profilo
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["upload_profile_pic"])) {
     if (!empty($_FILES["profile_pic"]["name"])) {
-        $target_dir = "../uploads/";
-        $file_name = basename($_FILES["profile_pic"]["name"]);
-        $target_file = $target_dir . $file_name;
-        $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+        $user_folder = $path2root . "uploads/" . $username;
+        
+        if (!file_exists($user_folder)) {
+            if (!mkdir($user_folder, 0777, true)) {
+                $errors[] = "Errore nella creazione della cartella per l'utente.";
+            }
+        }
 
-        // Controlla se è un'immagine valida
+        $file_name = basename($_FILES["profile_pic"]["name"]);
+        $imageFileType = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+        $new_file_name = $username . "." . $imageFileType; // Usa l'username e l'estensione del file
+
+        $target_file = $user_folder . "/" . $new_file_name;
+
         $check = getimagesize($_FILES["profile_pic"]["tmp_name"]);
         if ($check === false) {
             $errors[] = "Il file non è un'immagine valida.";
         }
 
-        // Controllo dimensioni file (max 2MB)
         if ($_FILES["profile_pic"]["size"] > 2 * 1024 * 1024) {
             $errors[] = "Il file è troppo grande. Massimo 2MB.";
         }
 
-        // Formati consentiti
         $allowed_formats = ["jpg", "jpeg", "png", "gif"];
         if (!in_array($imageFileType, $allowed_formats)) {
             $errors[] = "Formato non supportato. Usa JPG, JPEG, PNG o GIF.";
         }
 
-        // Se non ci sono errori, salva l'immagine
         if (empty($errors)) {
             if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file)) {
                 $stmt = $conn->prepare("UPDATE users SET profile_pic = ? WHERE username = ?");
-                $stmt->bind_param("ss", $file_name, $username);
+                $stmt->bind_param("ss", $new_file_name, $username);
                 $stmt->execute();
-                $profile_pic = $file_name;
+                $profile_pic = $new_file_name;
                 $success = "Immagine del profilo aggiornata con successo!";
             } else {
                 $errors[] = "Errore nel caricamento del file.";
@@ -89,12 +95,10 @@ include $path2root . '/components/navbar.php';
         <div class="col-md-6">
             <div class="card shadow-lg p-4 text-center">
                 
-                <!-- Immagine del profilo -->
                 <div class="mb-3">
-                    <img src="../uploads/<?php echo htmlspecialchars($profile_pic); ?>" alt="Immagine profilo" class="rounded-circle border" width="150" height="150">
+                    <img src="../uploads/<?php echo htmlspecialchars($username) . "/" . htmlspecialchars($profile_pic); ?>" alt="Immagine profilo" class="rounded-circle border" width="150" height="150">
                 </div>
 
-                <!-- Form per cambiare immagine -->
                 <form action="account.php" method="POST" enctype="multipart/form-data">
                     <input type="file" name="profile_pic" class="form-control mb-2">
                     <button type="submit" name="upload_profile_pic" class="btn btn-secondary">Cambia immagine</button>
@@ -118,7 +122,6 @@ include $path2root . '/components/navbar.php';
                     </div>
                 <?php endif; ?>
 
-                <!-- Form per aggiornare i dati -->
                 <form action="account.php" method="POST">
                     <div class="mb-3">
                         <label for="current_password" class="form-label">Password attuale</label>
@@ -143,42 +146,6 @@ include $path2root . '/components/navbar.php';
                     <button type="submit" name="update_account" class="btn btn-primary w-100">Aggiorna</button>
                 </form>
 
-                <hr>
-                <p class="mt-3 text-center">
-                    Torna alla <a href="<?php echo $path2root ?>index.php">home</a> | 
-                    <a href="#" id="toggleDeleteForm" class="text-danger">Elimina Account</a>
-                </p>
-
-                <div id="deleteAccountForm" style="display: none;">
-                    <h3 class="text-center text-danger">Elimina account</h3>
-                    <p class="text-center">Attenzione! Questa azione è irreversibile.</p>
-                    
-                    <form action="account.php" method="POST">
-                        <div class="mb-3">
-                            <label for="delete_password" class="form-label">Inserisci la password</label>
-                            <input type="password" name="delete_password" id="delete_password" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="delete_password_confirm" class="form-label">Conferma la password</label>
-                            <input type="password" name="delete_password_confirm" id="delete_password_confirm" class="form-control" required>
-                        </div>
-
-                        <button type="submit" name="delete_account" class="btn btn-danger w-100">Elimina Account</button>
-                    </form>
-                </div>
-
-                <script>
-                    document.getElementById("toggleDeleteForm").addEventListener("click", function(event) {
-                        event.preventDefault();
-                        let form = document.getElementById("deleteAccountForm");
-                        if (form.style.display === "none" || form.style.display === "") {
-                            form.style.display = "block";
-                        } else {
-                            form.style.display = "none";
-                        }
-                    });
-                </script>
             </div>
         </div>
     </div>
