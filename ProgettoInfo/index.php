@@ -48,17 +48,18 @@ $stmt->close();
             <?php if (!empty($prodotti)): ?>
                 <?php foreach ($prodotti as $prodotto): ?>
                     <div class="col-md-3 mt-3">
-                        <div class="card shadow-sm">
-                            <img src="<?= htmlspecialchars($path2root . $prodotto['immagine']) ?>" class="card-img-top" alt="<?= htmlspecialchars($prodotto['nome']) ?>">
-                            <div class="card-body">
+                        <div class="card shadow-sm d-flex flex-column h-100">
+                            <img src="<?= htmlspecialchars($path2root . $prodotto['immagine']) ?>" class="card-img-top" alt="<?= htmlspecialchars($prodotto['nome']) ?>" style="height: 200px; object-fit: cover;">
+                            <div class="card-body d-flex flex-column flex-grow-1">
                                 <h5 class="card-title"><?= htmlspecialchars($prodotto['nome']) ?></h5>
-                                <p class="card-text"><?= htmlspecialchars($prodotto['descrizione']) ?></p>
+                                <p class="card-text flex-grow-1"><?= htmlspecialchars($prodotto['descrizione']) ?></p>
                                 <h6 class="text-primary"><?= htmlspecialchars($prodotto['prezzo']) ?>€</h6>
                                 <p class="small text-muted">Venduto da: <?= htmlspecialchars($prodotto['username']) ?></p>
-                                <button class="btn w-100" style="background-color: #FFB22C">🛒 Aggiungi al carrello</button>
+                                <button class="btn w-100 mt-auto" style="background-color: #FFB22C">🛒 Aggiungi al carrello</button>
                             </div>
                         </div>
                     </div>
+
                 <?php endforeach; ?>
             <?php else: ?>
                 <p class="text-center">Nessun prodotto disponibile al momento.</p>
