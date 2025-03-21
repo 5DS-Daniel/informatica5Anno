@@ -167,7 +167,7 @@ include $path2root . '/components/navbar.php';
                         <?php foreach ($products as $product): ?>
                             <div class="col-md-4 mb-3">
                                 <div class="card">
-                                    <img src="<?php echo htmlspecialchars($product['immagine']); ?>" class="card-img-top" alt="Immagine prodotto" style="height: 150px; object-fit: cover;">
+                                    <img src="<?php echo htmlspecialchars($path2root . $product['immagine']); ?>" class="card-img-top" alt="Immagine prodotto" style="height: 150px; object-fit: cover;">
                                     <div class="card-body">
                                         <h5 class="card-title"><?php echo htmlspecialchars($product['nome']); ?></h5>
                                         <p class="card-text"><?php echo htmlspecialchars($product['descrizione']); ?></p>

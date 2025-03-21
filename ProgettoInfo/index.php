@@ -49,7 +49,7 @@ $stmt->close();
                 <?php foreach ($prodotti as $prodotto): ?>
                     <div class="col-md-3 mt-3">
                         <div class="card shadow-sm">
-                            <img src="<?= htmlspecialchars($prodotto['immagine']) ?>" class="card-img-top" alt="<?= htmlspecialchars($prodotto['nome']) ?>">
+                            <img src="<?= htmlspecialchars($path2root . $prodotto['immagine']) ?>" class="card-img-top" alt="<?= htmlspecialchars($prodotto['nome']) ?>">
                             <div class="card-body">
                                 <h5 class="card-title"><?= htmlspecialchars($prodotto['nome']) ?></h5>
                                 <p class="card-text"><?= htmlspecialchars($prodotto['descrizione']) ?></p>

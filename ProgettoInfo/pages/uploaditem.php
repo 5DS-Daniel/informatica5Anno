@@ -49,21 +49,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["immagine"])) {
         $stmt->execute();
         $product_id = $stmt->insert_id;
 
-        $user_folder = "../uploads/" . $username;
+        $user_folder = "uploads/" . $username;
         $products_folder = $user_folder . "/products";
 
-        if (!file_exists($user_folder)) {
-            mkdir($user_folder, 0777, true);
+        if (!file_exists($path2root . $user_folder)) {
+            mkdir($path2root . $user_folder, 0777, true);
         }
-        if (!file_exists($products_folder)) {
-            mkdir($products_folder, 0777, true);
+        if (!file_exists($path2root . $products_folder)) {
+            mkdir($path2root . $products_folder, 0777, true);
         }
 
         $image_extension = pathinfo($_FILES["immagine"]["name"], PATHINFO_EXTENSION);
         $image_name = $product_id . "." . $image_extension;
         $image_path = $products_folder . "/" . $image_name;
 
-        if (move_uploaded_file($_FILES["immagine"]["tmp_name"], $image_path)) {
+        if (move_uploaded_file($_FILES["immagine"]["tmp_name"], $path2root . $image_path)) {
             $update_stmt = $conn->prepare("UPDATE products SET immagine = ? WHERE id = ?");
             $update_stmt->bind_param("si", $image_path, $product_id);
             $update_stmt->execute();
@@ -91,7 +91,7 @@ include $path2root . '/components/navbar.php';
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="card shadow-lg p-4 text-center">
-                    <form action="upload.php" method="POST" enctype="multipart/form-data">
+                    <form action="uploaditem.php" method="POST" enctype="multipart/form-data">
                         <input type="text" name="nome" placeholder="Nome del prodotto" required>
                         <textarea name="descrizione" placeholder="Descrizione" required></textarea>
                         <input type="number" name="prezzo" step="0.01" placeholder="Prezzo" required>
