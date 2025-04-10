@@ -6,7 +6,40 @@ require "pages/config.php";
 
 include 'components/navbar.php';
 
-$stmt = $conn->prepare("SELECT p.nome, p.descrizione, p.prezzo, p.immagine, u.username 
+
+$successMessage = '';
+
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'], $_POST['product_name'])) {
+    $productId = (int) $_POST['product_id'];
+    $productName = $_POST['product_name'];
+
+    // Controlla se l'id è già nel carrello
+    $alreadyInCart = false;
+    foreach ($_SESSION['cart'] as $item) {
+        if ($item['id'] === $productId) {
+            $alreadyInCart = true;
+            break;
+        }
+    }
+
+    if (!$alreadyInCart) {
+        $_SESSION['cart'][] = [
+            'id' => $productId,
+            'name' => $productName
+        ];
+        $successMessage = "✅ Prodotto aggiunto al carrello!";
+    } else {
+        $successMessage = "⚠️ Prodotto già nel carrello.";
+    }
+}
+
+
+
+$stmt = $conn->prepare("SELECT p.id, p.nome, p.descrizione, p.prezzo, p.immagine, u.username 
                         FROM products p 
                         JOIN users u ON p.user_id = u.id
                         ORDER BY p.id DESC
@@ -47,7 +80,7 @@ $stmt->close();
         <div class="row">
             <?php if (!empty($prodotti)): ?>
                 <?php foreach ($prodotti as $prodotto): ?>
-                    <div class="col-md-3 mt-3">
+                    <div class="col-md-4 mt-3">
                         <div class="card shadow-sm d-flex flex-column h-100">
                             <img src="<?= htmlspecialchars($path2root . $prodotto['immagine']) ?>" class="card-img-top" alt="<?= htmlspecialchars($prodotto['nome']) ?>" style="height: 200px; object-fit: cover;">
                             <div class="card-body d-flex flex-column flex-grow-1">
@@ -55,7 +88,12 @@ $stmt->close();
                                 <p class="card-text flex-grow-1"><?= htmlspecialchars($prodotto['descrizione']) ?></p>
                                 <h6 class="text-primary"><?= htmlspecialchars($prodotto['prezzo']) ?>€</h6>
                                 <p class="small text-muted">Venduto da: <?= htmlspecialchars($prodotto['username']) ?></p>
-                                <button class="btn w-100 mt-auto" style="background-color: #FFB22C">🛒 Aggiungi al carrello</button>
+                                <form method="POST" action="">
+                                    <input type="hidden" name="product_id" value="<?= (int) $prodotto['id'] ?>">
+                                    <input type="hidden" name="product_name" value="<?= htmlspecialchars($prodotto['nome']) ?>">
+                                    <button type="submit" class="btn w-100 mt-auto" style="background-color: #FFB22C">🛒 Aggiungi al carrello</button>
+                                </form>
+
                             </div>
                         </div>
                     </div>

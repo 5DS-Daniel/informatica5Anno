@@ -26,6 +26,9 @@
           <li class="nav-item">
             <a class="nav-link" style="font-weight: bold;" href="<?php echo $path2root?>pages/logout.php">Logout</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" style="font-weight: bold;" href="<?php echo $path2root?>pages/cart.php">Carrello</a>
+          </li>
         <?php else: ?>
           <li class="nav-item">
             <a class="nav-link" style="font-weight: bold;" href="<?php echo $path2root?>pages/register.php">Register</a>

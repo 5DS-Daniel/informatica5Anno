@@ -44,7 +44,7 @@ $success = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["upload_profile_pic"])) {
     if (!empty($_FILES["profile_pic"]["name"])) {
-        $user_folder = $path2root . "uploads/" . $username;
+        $user_folder = $path2root . "uploads/users/" . $username;
         
         if (!file_exists($user_folder)) {
             if (!mkdir($user_folder, 0777, true)) {
@@ -105,11 +105,11 @@ include $path2root . '/components/navbar.php';
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card shadow-lg p-4 text-center">
                 
                 <div class="mb-3">
-                    <img src="../uploads/<?php echo htmlspecialchars($username) . "/" . htmlspecialchars($profile_pic); ?>" alt="Immagine profilo" class="rounded-circle border" width="150" height="150">
+                    <img src="../uploads/users/<?php echo htmlspecialchars($username) . "/" . htmlspecialchars($profile_pic); ?>" alt="Immagine profilo" class="rounded-circle border" width="150" height="150">
                 </div>
 
                 <form action="account.php" method="POST" enctype="multipart/form-data">
@@ -165,7 +165,7 @@ include $path2root . '/components/navbar.php';
                 <?php if (count($products) > 0): ?>
                     <div class="row">
                         <?php foreach ($products as $product): ?>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-5 mb-3">
                                 <div class="card">
                                     <img src="<?php echo htmlspecialchars($path2root . $product['immagine']); ?>" class="card-img-top" alt="Immagine prodotto" style="height: 150px; object-fit: cover;">
                                     <div class="card-body">
