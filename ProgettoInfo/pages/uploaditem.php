@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["immagine"])) {
         $stmt->execute();
         $product_id = $stmt->insert_id;
 
-        $user_folder = "uploads/" . $username;
+        $user_folder = "uploads/users/" . $user_id;
         $products_folder = $user_folder . "/products";
 
         if (!file_exists($path2root . $user_folder)) {

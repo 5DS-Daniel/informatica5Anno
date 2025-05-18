@@ -67,8 +67,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   `ruolo` enum('utente','admin') NOT NULL DEFAULT 'utente',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `email_2` (`email`),
-  UNIQUE KEY `email_3` (`email`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

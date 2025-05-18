@@ -3,8 +3,8 @@
 session_start();
 
 $path2root = "../";
-include $path2root.'/components/navbar.php';
-require $path2root.'/pages/config.php';
+include $path2root . '/components/navbar.php';
+require $path2root . '/pages/config.php';
 
 $errors = [];
 $username = "";
@@ -40,9 +40,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $username, $email, $hashed_password);
             $stmt->execute();
+            $user_id = $stmt->insert_id; // Get the newly created user's ID
             $stmt->close();
 
-            $user_folder = $path2root . "uploads/" . $username;
+            $user_folder = $path2root . "uploads/users/" . $user_id;
 
             if (!file_exists($user_folder)) {
                 if (!mkdir($user_folder, 0777, true)) {
@@ -51,6 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             $_SESSION['user'] = $username;
+            $_SESSION['user_id'] = $user_id; // Store the user ID in the session
             $_SESSION['role'] = 'user';
 
             echo "Registrazione avvenuta con successo!";

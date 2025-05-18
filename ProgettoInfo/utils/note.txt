@@ -1,0 +1,19 @@
+PERCHE USIAMO 0755 e non 0777 e TRUE
+
+
+0777 dà accesso completo a chiunque, anche a utenti non autorizzati (sul server).
+È utile solo in ambienti locali/test o se hai problemi di permessi temporanei.
+
+✅ In produzione, meglio:
+
+    0755: proprietario ha accesso completo, altri solo lettura/esecuzione.
+
+    Oppure 0700: accesso solo al proprietario.
+
+
+
+
+SCANDRI controlla quanti elementi ci sono nella cartella.
+	Già di base ogni cartella ha "." che indica la cartella corrente e 
+	".." che indica la directory padre. Quindi se la funzione da 2 di resto vuol dire
+	che ci sono solo loro e quindi vuota quindi si puo cancellare
