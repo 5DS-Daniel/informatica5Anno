@@ -93,22 +93,22 @@ include $path2root . '/components/navbar.php';
                 <div class="card shadow-lg p-4 text-center">
                     <form action="uploaditem.php" method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
-                            <label for="nome" class="form-label">Password attuale</label>
+                            <label for="nome" class="form-label">Inserisci nome del prodotto</label>
                             <input type="text" name="nome" placeholder="Nome del prodotto" class="form-control" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="descrizione" class="form-label">Password attuale</label>
+                            <label for="descrizione" class="form-label">Inserisci la descrizione del prodotto</label>
                             <textarea name="descrizione" placeholder="Descrizione" required class="form-control"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="prezzo" class="form-label">Password attuale</label>
+                            <label for="prezzo" class="form-label">Inserisci il prezzo del prodotto</label>
                             <input type="number" name="prezzo" step="0.01" placeholder="Prezzo" class="form-control" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="immagine" class="form-label">Password attuale</label>
+                            <label for="immagine" class="form-label">Carica una foto del prodotto</label>
                             <input type="file" name="immagine" class="form-control" required>
                         </div>
                         <button type="submit" name="add-item" class="btn w-100" style="background-color: #FFB22C;">Aggiungi prodotto</button>

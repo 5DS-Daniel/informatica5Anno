@@ -17,25 +17,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'], $_POST[
     $productId = (int) $_POST['product_id'];
     $productName = $_POST['product_name'];
 
-    // Controlla se l'id è già nel carrello
-    $alreadyInCart = false;
-    foreach ($_SESSION['cart'] as $item) {
+    $found = false;
+    foreach ($_SESSION['cart'] as &$item) {
         if ($item['id'] === $productId) {
-            $alreadyInCart = true;
+            $item['quantity'] += 1;
+            $successMessage = "🔁 Quantità aggiornata nel carrello.";
+            $found = true;
             break;
         }
     }
+    
 
-    if (!$alreadyInCart) {
+    if (!$found) {
         $_SESSION['cart'][] = [
             'id' => $productId,
-            'name' => $productName
+            'name' => $productName,
+            'quantity' => 1
         ];
         $successMessage = "✅ Prodotto aggiunto al carrello!";
-    } else {
-        $successMessage = "⚠️ Prodotto già nel carrello.";
     }
-}
+    }
 
 
 
