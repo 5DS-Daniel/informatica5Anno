@@ -1,9 +1,8 @@
 <?php
 session_start();
 $path2root = "../";
-require $path2root . "pages/config.php"; // Connessione DB
+require $path2root . "pages/config.php";
 
-// Se non sei loggato, vai alla home
 if (!isset($_SESSION['user_id'])) {
     header("Location:" . $path2root . "index.php");
     exit();
@@ -11,7 +10,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 
-// Carica dati utente
 $stmt = $conn->prepare("SELECT id, username, email, password, profile_pic FROM users WHERE id = ?");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
@@ -20,24 +18,39 @@ $userData = $result->fetch_assoc();
 $stmt->close();
 
 if (!$userData) {
-    // Utente non trovato, distruggi sessione e fai logout
     session_destroy();
     header("Location: " . $path2root . "login.php");
     exit();
 }
 
+if (!empty($userData['profile_pic'])) {
+    $profile_pic = $userData['profile_pic'];
+} else {
+    $profile_pic = "default.png";
+}
+
 $username = $userData['username'];
 $email = $userData['email'];
 $hashed_password = $userData['password'];
-$profile_pic = !empty($userData['profile_pic']) ? $userData['profile_pic'] : "default.png";
 
-// Carica prodotti venduti dall'utente
-$stmt = $conn->prepare("SELECT id, nome, descrizione, prezzo, immagine FROM products WHERE user_id = ?");
+
+//andiamo a recueprare i prodtotti che lk'utente sta vendendo. stile vinted
+$stmt = $conn->prepare("SELECT id, nome, descrizione, prezzo FROM products WHERE user_id = ?");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $productsResult = $stmt->get_result();
 $products = [];
 while ($product = $productsResult->fetch_assoc()) {
+    $img_stmt = $conn->prepare("SELECT image_path FROM product_images WHERE product_id = ?");
+    $img_stmt->bind_param("i", $product['id']);
+    $img_stmt->execute();
+    $img_result = $img_stmt->get_result();
+    $images = [];
+    while ($img = $img_result->fetch_assoc()) {
+        $images[] = $img['image_path'];
+    }
+    $img_stmt->close();
+    $product['images'] = $images;
     $products[] = $product;
 }
 $stmt->close();
@@ -45,7 +58,6 @@ $stmt->close();
 $errors = [];
 $success = "";
 
-// --- GESTIONE UPLOAD IMMAGINE PROFILO ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["upload_profile_pic"])) {
     if (isset($_FILES['profile_pic'])) {
         $file = $_FILES['profile_pic'];
@@ -221,7 +233,27 @@ include $path2root . '/components/navbar.php';
                         <?php foreach ($products as $product): ?>
                             <div class="col-md-5 mb-3">
                                 <div class="card">
-                                    <img src="<?php echo htmlspecialchars($path2root . $product['immagine']); ?>" class="card-img-top" alt="Immagine prodotto" style="height: 150px; object-fit: cover;" />
+                                    <?php if (!empty($product['images'])): ?>
+                                        <div id="carousel-<?php echo $product['id']; ?>" class="carousel slide" data-bs-ride="carousel">
+                                            <div class="carousel-inner">
+                                                <?php foreach ($product['images'] as $idx => $img): ?>
+                                                    <div class="carousel-item <?php if ($idx === 0) echo 'active'; ?>">
+                                                        <img src="<?php echo htmlspecialchars($path2root . $img); ?>" class="card-img-top" alt="Immagine prodotto" style="height: 150px; object-fit: cover;" />
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            <?php if (count($product['images']) > 1): ?>
+                                                <button class="carousel-control-prev" type="button" data-bs-target="#carousel-<?php echo $product['id']; ?>" data-bs-slide="prev">
+                                                    <span class="carousel-control-prev-icon"></span>
+                                                </button>
+                                                <button class="carousel-control-next" type="button" data-bs-target="#carousel-<?php echo $product['id']; ?>" data-bs-slide="next">
+                                                    <span class="carousel-control-next-icon"></span>
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <img src="https://via.placeholder.com/200" class="card-img-top" alt="Nessuna immagine" style="height: 150px; object-fit: cover;" />
+                                    <?php endif; ?>
                                     <div class="card-body">
                                         <h5 class="card-title"><?php echo htmlspecialchars($product['nome']); ?></h5>
                                         <p class="card-text"><?php echo htmlspecialchars($product['descrizione']); ?></p>
@@ -242,3 +274,4 @@ include $path2root . '/components/navbar.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+<?php include $path2root . 'components/footer.php'; ?>

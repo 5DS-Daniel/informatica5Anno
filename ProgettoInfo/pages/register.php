@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $username, $email, $hashed_password);
             $stmt->execute();
-            $user_id = $stmt->insert_id; // Get the newly created user's ID
+            $user_id = $stmt->insert_id;
             $stmt->close();
 
             $user_folder = $path2root . "uploads/users/" . $user_id;
@@ -52,17 +52,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             $_SESSION['user'] = $username;
-            $_SESSION['user_id'] = $user_id; // Store the user ID in the session
+            $_SESSION['user_id'] = $user_id;
             $_SESSION['role'] = 'user';
 
-            echo "Registrazione avvenuta con successo!";
             header("Location:" . $path2root . "index.php");
             exit();
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            if (@mysqli_errno($conn) == 1644) {
-                $message = @mysqli_error($conn);
-                $errors[] = $message;
+        } catch (mysqli_sql_exception $e) {
+            // Controllo errori di duplicato username/email
+            if ($conn->errno == 1062) {
+                if (strpos($e->getMessage(), 'username') !== false) {
+                    $errors[] = "Nome utente già registrato.";
+                } elseif (strpos($e->getMessage(), 'email') !== false) {
+                    $errors[] = "Email già registrata.";
+                } else {
+                    $errors[] = "Errore: " . $e->getMessage();
+                }
+            } else {
+                $errors[] = "Errore: " . $e->getMessage();
             }
         }
     }
@@ -130,3 +136,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+<?php include $path2root . 'components/footer.php'; ?>

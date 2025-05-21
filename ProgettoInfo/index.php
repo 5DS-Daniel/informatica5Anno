@@ -36,23 +36,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'], $_POST[
         ];
         $successMessage = "✅ Prodotto aggiunto al carrello!";
     }
-    }
+}
 
 
+//Ho deciso di recuperare gli ultimi 5 prod ma alla fin fine si puo scegleire quanti
+// e soprattutto magari in futuro anche filtrali
 
-$stmt = $conn->prepare("SELECT p.id, p.nome, p.descrizione, p.prezzo, p.immagine, u.username 
+$stmt = $conn->prepare("SELECT p.id, p.nome, p.descrizione, p.prezzo, u.username 
                         FROM products p 
                         JOIN users u ON p.user_id = u.id
                         ORDER BY p.id DESC
-                        LIMIT 4");
-
-#INFO: la p la usiamo come alias per evitare di dover scirvere ogni volta products
-
-
-
+                        LIMIT 5");
 $stmt->execute();
 $result = $stmt->get_result();
-$prodotti = $result->fetch_all(MYSQLI_ASSOC);
+$prodotti = [];
+while ($prodotto = $result->fetch_assoc()) {
+    $img_stmt = $conn->prepare("SELECT image_path FROM product_images WHERE product_id = ?");
+    $img_stmt->bind_param("i", $prodotto['id']);
+    $img_stmt->execute();
+    $img_result = $img_stmt->get_result();
+    $immagini = [];
+    while ($img = $img_result->fetch_assoc()) {
+        $immagini[] = $img['image_path'];
+    }
+    $img_stmt->close();
+    $prodotto['immagini'] = $immagini;
+    $prodotti[] = $prodotto;
+}
 $stmt->close();
 
 ?>
@@ -68,6 +78,18 @@ $stmt->close();
 </head>
 
 <body class="bg-light">
+    <!--questo pezzo è quello che botstrap chiama toast, che indica il piccolo pop-up che appare in basso a destra  -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" <?php if (!empty($successMessage)) echo 'data-bs-autohide="false"'; ?>>
+            <div class="d-flex">
+                <div class="toast-body">
+                    <?= htmlspecialchars($successMessage) ?>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Chiudi"></button>
+            </div>
+        </div>
+    </div>
+
     <div class="container mt-5">
         <h2 class="text-center">
             <?php if (isset($_SESSION['user'])): ?>
@@ -83,7 +105,11 @@ $stmt->close();
                 <?php foreach ($prodotti as $prodotto): ?>
                     <div class="col-md-4 mt-3">
                         <div class="card shadow-sm d-flex flex-column h-100">
-                            <img src="<?= htmlspecialchars($path2root . $prodotto['immagine']) ?>" class="card-img-top" alt="<?= htmlspecialchars($prodotto['nome']) ?>" style="height: 200px; object-fit: cover;">
+                            <?php if (!empty($prodotto['immagini'])): ?>
+                                <img src="<?= htmlspecialchars($path2root . $prodotto['immagini'][0]) ?>" class="card-img-top" alt="<?= htmlspecialchars($prodotto['nome']) ?>" style="height: 200px; object-fit: cover;">
+                            <?php else: ?>
+                                <img src="https://via.placeholder.com/200" class="card-img-top" alt="Nessuna immagine" style="height: 200px; object-fit: cover;">
+                            <?php endif; ?>
                             <div class="card-body d-flex flex-column flex-grow-1">
                                 <h5 class="card-title"><?= htmlspecialchars($prodotto['nome']) ?></h5>
                                 <p class="card-text flex-grow-1"><?= htmlspecialchars($prodotto['descrizione']) ?></p>
@@ -94,17 +120,25 @@ $stmt->close();
                                     <input type="hidden" name="product_name" value="<?= htmlspecialchars($prodotto['nome']) ?>">
                                     <button type="submit" class="btn w-100 mt-auto" style="background-color: #FFB22C">🛒 Aggiungi al carrello</button>
                                 </form>
-
                             </div>
                         </div>
                     </div>
-
                 <?php endforeach; ?>
             <?php else: ?>
                 <p class="text-center">Nessun prodotto disponibile al momento.</p>
             <?php endif; ?>
         </div>
     </div>
+<?php include $path2root . 'components/footer.php'; ?>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            <?php if (!empty($successMessage)): ?>
+                var toastEl = document.getElementById('cartToast');
+                var toast = new bootstrap.Toast(toastEl, { delay: 2500 });
+                toast.show();
+            <?php endif; ?>
+        });
+    </script>
 </body>
 
 </html>

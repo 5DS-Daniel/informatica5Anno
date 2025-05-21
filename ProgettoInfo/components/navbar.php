@@ -27,7 +27,7 @@
             <a class="nav-link fw-semibold text-dark" href="<?php echo $path2root ?>pages/logout.php">Logout</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link fw-semibold text-dark" href="<?php echo $path2root ?>pages/cart.php">Carrello</a>
+            <a class="nav-link fw-semibold text-dark" href="<?php echo $path2root ?>pages/cart.php">Cart</a>
           </li>
         <?php else: ?>
           <li class="nav-item">

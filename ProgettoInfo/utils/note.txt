@@ -17,3 +17,24 @@ SCANDRI controlla quanti elementi ci sono nella cartella.
 	Già di base ogni cartella ha "." che indica la cartella corrente e 
 	".." che indica la directory padre. Quindi se la funzione da 2 di resto vuol dire
 	che ci sono solo loro e quindi vuota quindi si puo cancellare
+
+
+
+metodo IMPLODE cosa fa?
+fa quella mega cosa simpatica di creare una stringa separata  dal separatore che scegli
+e ci mette un valore scleto da te. In questo caso ho aftto cosi cosi che nella query mettero la ricerca
+di tutti gli ID che fanno parte del carrello. Se nel carrello ho 3 oggetti, quella stringa 
+sarà: ?,?,?.
+
+
+STR_REPEAT()?
+crea una stringa di tanti caratteri quanti ne dai tu
+
+DOMCONTENTLOADED ?
+
+indica la pagina, qjuindi si verifica che quando
+la pafina viene carica se ci sia un successMessage.
+Se si, viene mandato il "toast" che per bootstrap è il pop-up
+
+
+

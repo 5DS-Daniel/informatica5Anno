@@ -31,6 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["immagine"])) {
 
     $errors = [];
 
+    //Si posso qui ovviamente implementare tutti i controlli con regex ad esempio
+
     if (empty($prodname)) {
         $errors[] = "Inserisci un nome valido";
     }
@@ -38,16 +40,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["immagine"])) {
         $errors[] = "Il prezzo deve essere maggiore di 0";
     }
 
+    $allowed_ext = ['jpg', 'jpeg', 'png', 'gif'];
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!in_array($_FILES["immagine"]["type"], $allowed_types)) {
-        $errors[] = "Formato immagine non valido.";
+
+    $image_extension = strtolower(pathinfo($_FILES["immagine"]["name"], PATHINFO_EXTENSION));
+    $image_mime = mime_content_type($_FILES["immagine"]["tmp_name"]);
+
+    if (!in_array($image_extension, $allowed_ext) || !in_array($image_mime, $allowed_types)) {
+        $errors[] = "Formato immagine non valido. Usa solo JPG, PNG o GIF.";
     }
 
     if (empty($errors)) {
-        $stmt = $conn->prepare("INSERT INTO products (user_id, nome, descrizione, prezzo, immagine) VALUES (?, ?, ?, ?, '')");
+        $stmt = $conn->prepare("INSERT INTO products (user_id, nome, descrizione, prezzo) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("issd", $user_id, $prodname, $proddesc, $prodprice);
         $stmt->execute();
         $product_id = $stmt->insert_id;
+
 
         $user_folder = "uploads/users/" . $user_id;
         $products_folder = $user_folder . "/products";
@@ -63,10 +71,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["immagine"])) {
         $image_name = $product_id . "." . $image_extension;
         $image_path = $products_folder . "/" . $image_name;
 
+
+//scorciatoia molto comoda per eviare errori perche viene usata così:
+// quando carichi un file mediante form, php lo slava in una cartella temporanea,
+//noi appunto dopo controlliamo che sia stata messa enlla sua cartella ed in quel caso
+//allora andiamo avanti e mettiamo l'entry nel database
+
         if (move_uploaded_file($_FILES["immagine"]["tmp_name"], $path2root . $image_path)) {
-            $update_stmt = $conn->prepare("UPDATE products SET immagine = ? WHERE id = ?");
-            $update_stmt->bind_param("si", $image_path, $product_id);
-            $update_stmt->execute();
+            $img_stmt = $conn->prepare("INSERT INTO product_images (product_id, image_path) VALUES (?, ?)");
+            $img_stmt->bind_param("is", $product_id, $image_path);
+            $img_stmt->execute();
+            $img_stmt->close();
 
             $success = "Prodotto caricato con successo!";
         } else {
@@ -137,3 +152,5 @@ include $path2root . '/components/navbar.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+<?php include $path2root . 'components/footer.php'; ?>
+

@@ -5,7 +5,6 @@ $path2root = "../";
 include $path2root.'/components/navbar.php';
 require $path2root.'/pages/config.php';
 
-// Se l'utente è già loggato, lo reindirizziamo alla home
 if (isset($_SESSION['user'])) {
     header("Location: " . $path2root . "index.php");
     exit();
@@ -20,7 +19,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($email) || empty($password)) {
         $errors[] = "Tutti i campi sono obbligatori.";
     } else {
-        // Recuperiamo l'utente dal database
         $stmt = $conn->prepare("SELECT id, username, password, ruolo FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -31,10 +29,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->fetch();
             
             if (password_verify($password, $hashed_password)) {
-                // Salviamo i dati in sessione
                 $_SESSION['user'] = $username;
                 $_SESSION['user_id'] = $id;
-                $_SESSION['ruolo'] = $ruolo; // Salvataggio del ruolo
+                $_SESSION['ruolo'] = $ruolo;
 
                 header("Location: " . $path2root . "index.php");
                 exit();
@@ -100,3 +97,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+<?php include $path2root . 'components/footer.php'; ?>

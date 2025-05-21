@@ -35,10 +35,9 @@ CREATE TABLE IF NOT EXISTS `products` (
   `nome` varchar(100) NOT NULL,
   `descrizione` text NOT NULL,
   `prezzo` decimal(10,2) NOT NULL,
-  `immagine` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dump dei dati per la tabella `products`
@@ -127,6 +126,20 @@ CREATE TRIGGER `check_username_before_update` BEFORE UPDATE ON `users` FOR EACH 
 END
 $$
 DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `product_images`
+--
+
+CREATE TABLE IF NOT EXISTS product_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    image_path VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
 
 --
 -- Limiti per le tabelle scaricate
