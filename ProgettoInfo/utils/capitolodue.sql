@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Feb 24, 2025 alle 21:43
+-- Creato il: Mag 22, 2025 alle 00:02
 -- Versione del server: 10.4.32-MariaDB
 -- Versione PHP: 8.2.12
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `capitolodue`
 --
-CREATE DATABASE IF NOT EXISTS `capitolodue` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `capitolodue`;
 
 -- --------------------------------------------------------
 
@@ -29,26 +27,27 @@ USE `capitolodue`;
 -- Struttura della tabella `products`
 --
 
-CREATE TABLE IF NOT EXISTS `products` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
   `descrizione` text NOT NULL,
   `prezzo` decimal(10,2) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
+  `immagine` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dump dei dati per la tabella `products`
+-- Struttura della tabella `product_images`
 --
 
-INSERT INTO `products` (`id`, `user_id`, `nome`, `descrizione`, `prezzo`, `immagine`) VALUES
-(1, 17, 'Smartphone XYZ', 'Smartphone con schermo OLED e fotocamera 108MP.', 599.99, 'https://via.placeholder.com/200'),
-(2, 17, 'Laptop UltraBook', 'Notebook leggero e potente con processore Intel i7 e 16GB di RAM.', 999.99, 'https://via.placeholder.com/200'),
-(3, 17, 'Auricolari Wireless Pro', 'Auricolari con cancellazione attiva del rumore e autonomia di 24 ore.', 149.99, 'https://via.placeholder.com/200'),
-(4, 17, 'Smartwatch FitBand', 'Smartwatch con monitoraggio del battito cardiaco e GPS.', 199.99, 'https://via.placeholder.com/200'),
-(5, 17, 'Monitor 4K UltraHD', 'Monitor da 27 pollici con risoluzione 4K UltraHD e HDR.', 349.99, 'https://via.placeholder.com/200');
+CREATE TABLE `product_images` (
+  `id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -56,26 +55,15 @@ INSERT INTO `products` (`id`, `user_id`, `nome`, `descrizione`, `prezzo`, `immag
 -- Struttura della tabella `users`
 --
 
-CREATE TABLE IF NOT EXISTS `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `profile_pic` varchar(255) NOT NULL DEFAULT 'default.png',
-  `ruolo` enum('utente','admin') NOT NULL DEFAULT 'utente',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dump dei dati per la tabella `users`
---
-
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `created_at`, `profile_pic`, `ruolo`) VALUES
-(15, 'ziotomilboss', 'danielfranchini@virgilio.ru', '$2y$10$F9MdrajN6Zu3kKbBE4bvkeCYGBKvmdEHWtW8W/X9uNfIQzf2ys2O2', '2025-02-24 19:18:32', 'default.png', 'utente'),
-(17, 'SIUUUUUUUM', 'danielfranchini@virgilio.ko', '$2y$10$EEyv/mTYmUV9FRtPwSmft.km9W2c7Oi/xh3uxa39vqVc6qr0N9Hau', '2025-02-24 19:51:58', 'default.png', 'admin');
+  `ruolo` enum('utente','admin') NOT NULL DEFAULT 'utente'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Trigger `users`
@@ -127,19 +115,53 @@ END
 $$
 DELIMITER ;
 
--- --------------------------------------------------------
-
 --
--- Struttura della tabella `product_images`
+-- Indici per le tabelle scaricate
 --
 
-CREATE TABLE IF NOT EXISTS product_images (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id INT NOT NULL,
-    image_path VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-);
+--
+-- Indici per le tabelle `products`
+--
+ALTER TABLE `products`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indici per le tabelle `product_images`
+--
+ALTER TABLE `product_images`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
+-- Indici per le tabelle `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
+-- AUTO_INCREMENT per le tabelle scaricate
+--
+
+--
+-- AUTO_INCREMENT per la tabella `products`
+--
+ALTER TABLE `products`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT per la tabella `product_images`
+--
+ALTER TABLE `product_images`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT per la tabella `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Limiti per le tabelle scaricate
@@ -150,6 +172,12 @@ CREATE TABLE IF NOT EXISTS product_images (
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `product_images`
+--
+ALTER TABLE `product_images`
+  ADD CONSTRAINT `product_images_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
